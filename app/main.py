@@ -38,6 +38,12 @@ def create_app(**kwargs: Any) -> Litestar:
 app = create_app()
 
 if __name__ == "__main__":
+    log_config = uvicorn.config.LOGGING_CONFIG
+    FORMAT_LOGS = '%(levelname)-10s | %(asctime)-15s - %(message)s'
+
+    log_config["formatters"]["access"]["fmt"] = FORMAT_LOGS
+    log_config["formatters"]["default"]["fmt"] = FORMAT_LOGS
+
     uvicorn.run(
         app,
         host=settings.server.HOST,
@@ -45,4 +51,5 @@ if __name__ == "__main__":
         port=settings.server.PORT,
         reload=settings.server.RELOAD,
         timeout_keep_alive=settings.server.KEEPALIVE,
+        log_config=log_config
     )
