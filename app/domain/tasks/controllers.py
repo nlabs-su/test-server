@@ -30,16 +30,9 @@ class TaskController(Controller):
 
         Поле tags должно содержать идентификаторы тегов.
 
-        - Если задача уже существует, то вернется код `TASK_ALREADY_EXISTS`.
         - Если тег не существует, то вернется код `TAG_NOT_FOUND`.
         """
         async with db.Session() as session:
-            task = await db.queries.task_read(
-                session=session, user_id=current_user.id, **data.model_dump(exclude={'tags'})
-            )
-            if task:
-                raise APIError(HTTPStatus.BAD_REQUEST, codes.TASK_ALREADY_EXISTS)
-
             for tag_id in data.tags:
                 tag = await db.queries.tag_read(session=session, id=tag_id, user_id=current_user.id)
                 if not tag:
@@ -106,19 +99,12 @@ class TaskController(Controller):
 
         Поле tags должно содержать идентификаторы тегов.
 
-        - Если задача уже существует, то вернется код `TASK_ALREADY_EXISTS`.
         - Если тег не существует, то вернется код `TAG_NOT_FOUND`.
         """
         async with db.Session() as session:
             task = await db.queries.task_read(session=session, id=id)
             if not task:
                 raise APIError(HTTPStatus.NOT_FOUND, codes.NOT_FOUND)
-
-            task_with_data = await db.queries.task_read(
-                session=session, user_id=current_user.id, **data.model_dump(exclude={'tags'})
-            )
-            if task_with_data and task_with_data.id != task.id:
-                raise APIError(HTTPStatus.BAD_REQUEST, codes.TASK_ALREADY_EXISTS)
 
             for tag_id in data.tags:
                 tag = await db.queries.tag_read(session=session, id=tag_id, user_id=current_user.id)
